@@ -10,6 +10,7 @@ import (
 	"github.com/xryar/golang-grpc-ecommerce/internal/handler"
 	"github.com/xryar/golang-grpc-ecommerce/pb/service"
 	"github.com/xryar/golang-grpc-ecommerce/pkg/database"
+	"github.com/xryar/golang-grpc-ecommerce/pkg/grpcmiddleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -27,7 +28,11 @@ func main() {
 
 	serviceHandler := handler.NewServiceHandler()
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			grpcmiddleware.ErrorMiddleware,
+		),
+	)
 
 	service.RegisterHelloWorldServiceServer(server, serviceHandler)
 
