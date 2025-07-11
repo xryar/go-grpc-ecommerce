@@ -2,10 +2,18 @@ package utils
 
 import "github.com/xryar/golang-grpc-ecommerce/pb/common"
 
-func SuccessResponse() *common.BaseResponse {
+func SuccessResponse(message string) *common.BaseResponse {
 	return &common.BaseResponse{
 		StatusCode: 200,
-		Message:    "Success",
+		Message:    message,
+	}
+}
+
+func BadRequestResponse(message string) *common.BaseResponse {
+	return &common.BaseResponse{
+		StatusCode: 400,
+		Message:    message,
+		IsError:    true,
 	}
 }
 
