@@ -9,6 +9,7 @@ option go_package = "github.com/xryar/golang-grpc-ecommerce/pb/product";
 
 service ProductService {
     rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
+    rpc DetailProduct (DetailProductRequest) returns (DetailProductResponse);
 }
 
 message CreateProductRequest {
@@ -22,4 +23,18 @@ message CreateProductRequest {
 message CreateProductResponse {
     common.BaseResponse base = 1;
     string id = 2;
+}
+
+message DetailProductRequest {
+    string id = 1 [(buf.validate.field).string = { min_len: 1, max_len: 255 }];
+
+}
+
+message DetailProductResponse {
+    common.BaseResponse base = 1;
+    string id = 2;
+    string name = 3;
+    string description = 4;
+    double price = 5;
+    string image_url = 6;
 }
