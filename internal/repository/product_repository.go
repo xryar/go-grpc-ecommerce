@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/xryar/golang-grpc-ecommerce/internal/entity"
 )
@@ -12,6 +13,7 @@ type IProductRepository interface {
 	CreateNewProduct(ctx context.Context, product *entity.Product) error
 	GetProductById(ctx context.Context, id string) (*entity.Product, error)
 	UpdateProduct(ctx context.Context, product *entity.Product) error
+	DeleteProduct(ctx context.Context, id string, deletedAt time.Time, deleteBy string) error
 }
 
 type productRepository struct {
@@ -74,7 +76,7 @@ func (repo *productRepository) GetProductById(ctx context.Context, id string) (*
 func (repo *productRepository) UpdateProduct(ctx context.Context, product *entity.Product) error {
 	_, err := repo.db.ExecContext(
 		ctx,
-		"UPDATE product SET name=$1, description=$2, price=$3, image_file_name=$4, updated_at=$5, updated_by=$6 WHERE id=$7",
+		"UPDATE product SET name = $1, description= $2, price= $3, image_file_name= $4, updated_at= $5, updated_by= $6 WHERE id= $7",
 		product.Name,
 		product.Description,
 		product.Price,
@@ -82,6 +84,21 @@ func (repo *productRepository) UpdateProduct(ctx context.Context, product *entit
 		product.UpdatedAt,
 		product.UpdatedBy,
 		product.Id,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *productRepository) DeleteProduct(ctx context.Context, id string, deletedAt time.Time, deleteBy string) error {
+	_, err := repo.db.ExecContext(
+		ctx,
+		"UPDATE product SET deleted_at = $1, deleted_by = $2, is_deleted = true WHERE id = $3",
+		deletedAt,
+		deleteBy,
+		id,
 	)
 	if err != nil {
 		return err
