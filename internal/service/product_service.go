@@ -20,6 +20,7 @@ type IProductService interface {
 	DetailProduct(ctx context.Context, request *product.DetailProductRequest) (*product.DetailProductResponse, error)
 	EditProduct(ctx context.Context, request *product.EditProductRequest) (*product.EditProductResponse, error)
 	DeleteProduct(ctx context.Context, request *product.DeleteProductRequest) (*product.DeleteProductResponse, error)
+	ListProduct(ctx context.Context, request *product.ListProductRequest) (*product.ListProductResponse, error)
 }
 
 type productService struct {
@@ -184,6 +185,30 @@ func (ps *productService) DeleteProduct(ctx context.Context, request *product.De
 
 	return &product.DeleteProductResponse{
 		Base: utils.SuccessResponse("Delete Product Success"),
+	}, nil
+}
+
+func (ps *productService) ListProduct(ctx context.Context, request *product.ListProductRequest) (*product.ListProductResponse, error) {
+	products, paginationResponse, err := ps.productRepository.GetProductsPagination(ctx, request.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	var data []*product.ListProductResponseItem = make([]*product.ListProductResponseItem, 0)
+	for _, prod := range products {
+		data = append(data, &product.ListProductResponseItem{
+			Id:          prod.Id,
+			Name:        prod.Name,
+			Description: prod.Description,
+			Price:       prod.Price,
+			ImageUrl:    fmt.Sprintf("%s/product/%s", os.Getenv("STORAGE_SERVICE_URL"), prod.ImageFileName),
+		})
+	}
+
+	return &product.ListProductResponse{
+		Base:       utils.SuccessResponse("Get List Product Success"),
+		Pagination: paginationResponse,
+		Data:       data,
 	}, nil
 }
 
