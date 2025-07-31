@@ -157,11 +157,12 @@ func (*ListCartRequest) Descriptor() ([]byte, []int) {
 
 type ListCartResponseItem struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	ProductId       string                 `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	ProductName     string                 `protobuf:"bytes,2,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
-	ProductImageUrl string                 `protobuf:"bytes,3,opt,name=product_image_url,json=productImageUrl,proto3" json:"product_image_url,omitempty"`
-	ProductPrice    float64                `protobuf:"fixed64,4,opt,name=product_price,json=productPrice,proto3" json:"product_price,omitempty"`
-	Quantity        int64                  `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	CartId          string                 `protobuf:"bytes,1,opt,name=cart_id,json=cartId,proto3" json:"cart_id,omitempty"`
+	ProductId       string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	ProductName     string                 `protobuf:"bytes,3,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	ProductImageUrl string                 `protobuf:"bytes,4,opt,name=product_image_url,json=productImageUrl,proto3" json:"product_image_url,omitempty"`
+	ProductPrice    float64                `protobuf:"fixed64,5,opt,name=product_price,json=productPrice,proto3" json:"product_price,omitempty"`
+	Quantity        int64                  `protobuf:"varint,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -194,6 +195,13 @@ func (x *ListCartResponseItem) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListCartResponseItem.ProtoReflect.Descriptor instead.
 func (*ListCartResponseItem) Descriptor() ([]byte, []int) {
 	return file_cart_cart_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListCartResponseItem) GetCartId() string {
+	if x != nil {
+		return x.CartId
+	}
+	return ""
 }
 
 func (x *ListCartResponseItem) GetProductId() string {
@@ -295,14 +303,15 @@ const file_cart_cart_proto_rawDesc = "" +
 	"\x18AddProductToCartResponse\x12(\n" +
 	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\"\x11\n" +
-	"\x0fListCartRequest\"\xc5\x01\n" +
-	"\x14ListCartResponseItem\x12\x1d\n" +
+	"\x0fListCartRequest\"\xde\x01\n" +
+	"\x14ListCartResponseItem\x12\x17\n" +
+	"\acart_id\x18\x01 \x01(\tR\x06cartId\x12\x1d\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\tR\tproductId\x12!\n" +
-	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12*\n" +
-	"\x11product_image_url\x18\x03 \x01(\tR\x0fproductImageUrl\x12#\n" +
-	"\rproduct_price\x18\x04 \x01(\x01R\fproductPrice\x12\x1a\n" +
-	"\bquantity\x18\x05 \x01(\x03R\bquantity\"n\n" +
+	"product_id\x18\x02 \x01(\tR\tproductId\x12!\n" +
+	"\fproduct_name\x18\x03 \x01(\tR\vproductName\x12*\n" +
+	"\x11product_image_url\x18\x04 \x01(\tR\x0fproductImageUrl\x12#\n" +
+	"\rproduct_price\x18\x05 \x01(\x01R\fproductPrice\x12\x1a\n" +
+	"\bquantity\x18\x06 \x01(\x03R\bquantity\"n\n" +
 	"\x10ListCartResponse\x12(\n" +
 	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x120\n" +
 	"\x05items\x18\x02 \x03(\v2\x1a.cart.ListCartResponseItemR\x05items2\x9b\x01\n" +

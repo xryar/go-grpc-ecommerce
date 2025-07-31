@@ -98,6 +98,7 @@ func (cs *cartService) ListCart(ctx context.Context, request *cart.ListCartReque
 	var items []*cart.ListCartResponseItem = make([]*cart.ListCartResponseItem, 0)
 	for _, cartEntity := range carts {
 		item := cart.ListCartResponseItem{
+			CartId:          cartEntity.Id,
 			ProductId:       cartEntity.Product.Id,
 			ProductName:     cartEntity.Product.Name,
 			ProductImageUrl: fmt.Sprintf("%s/product/%s", os.Getenv("STORAGE_SERVICE_URL"), cartEntity.Product.ImageFileName),
