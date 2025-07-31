@@ -9,6 +9,7 @@ package cart;
 
 service CartService {
     rpc AddProductToCart (AddProductToCartRequest) returns (AddProductToCartResponse);
+    rpc ListCart (ListCartRequest) returns (ListCartResponse);
 }
 
 message AddProductToCartRequest {
@@ -18,4 +19,18 @@ message AddProductToCartRequest {
 message AddProductToCartResponse {
     common.BaseResponse base = 1;
     string id = 2;
+}
+
+message ListCartRequest {}
+
+message ListCartResponseItem {
+    string product_id = 1;
+    string product_name = 2;
+    string product_image_utl = 3;
+    int64 quantity = 4;
+}
+
+message ListCartResponse {
+    common.BaseResponse base = 1;
+    repeated ListCartResponseItem items = 2;
 }
