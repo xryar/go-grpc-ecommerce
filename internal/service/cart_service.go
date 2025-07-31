@@ -117,9 +117,34 @@ func (cs *cartService) ListCart(ctx context.Context, request *cart.ListCartReque
 }
 
 func (cs *cartService) DeleteCart(ctx context.Context, request *cart.DeleteCartRequest) (*cart.DeleteCartResponse, error) {
+	claims, err := jwtentity.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cartEntity, err := cs.cartRepository.GetCartById(ctx, request.CartId)
+	if err != nil {
+		return nil, err
+	}
+	if cartEntity == nil {
+		return &cart.DeleteCartResponse{
+			Base: utils.NotFoundResponse("Cart Not Found"),
+		}, nil
+	}
+
+	if cartEntity.UserId != claims.Subject {
+		return &cart.DeleteCartResponse{
+			Base: utils.BadRequestResponse("Cart user is not matched"),
+		}, nil
+	}
+
+	err = cs.cartRepository.DeleteCart(ctx, request.CartId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &cart.DeleteCartResponse{
-		Base: utils.SuccessResponse("Success Delete Cart"),
+		Base: utils.SuccessResponse("Delete Cart Success"),
 	}, nil
 }
 
