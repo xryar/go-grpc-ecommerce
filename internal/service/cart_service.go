@@ -14,6 +14,7 @@ import (
 
 type ICartService interface {
 	AddProductToCart(ctx context.Context, request *cart.AddProductToCartRequest) (*cart.AddProductToCartResponse, error)
+	ListCart(ctx context.Context, request *cart.ListCartRequest) (*cart.ListCartResponse, error)
 }
 
 type cartService struct {
@@ -78,6 +79,10 @@ func (cs *cartService) AddProductToCart(ctx context.Context, request *cart.AddPr
 		Base: utils.SuccessResponse("Add Product to Cart Success"),
 		Id:   newCartEntity.Id,
 	}, nil
+
+}
+
+func (cs *cartService) ListCart(ctx context.Context, request *cart.ListCartRequest) (*cart.ListCartResponse, error) {
 
 }
 
