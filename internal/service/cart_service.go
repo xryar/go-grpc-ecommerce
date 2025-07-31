@@ -171,6 +171,17 @@ func (cs *cartService) UpdateCartQuantity(ctx context.Context, request *cart.Upd
 		}, nil
 	}
 
+	if request.NewQuantity == 0 {
+		err := cs.cartRepository.DeleteCart(ctx, request.CartId)
+		if err != nil {
+			return nil, err
+		}
+
+		return &cart.UpdateCartQuantityResponse{
+			Base: utils.SuccessResponse("Update Cart Quantity Success"),
+		}, nil
+	}
+
 	now := time.Now()
 	cartEntity.Quantity = int(request.NewQuantity)
 	cartEntity.UpdateAt = &now
@@ -182,7 +193,7 @@ func (cs *cartService) UpdateCartQuantity(ctx context.Context, request *cart.Upd
 	}
 
 	return &cart.UpdateCartQuantityResponse{
-		Base: utils.SuccessResponse("Update Cart Success"),
+		Base: utils.SuccessResponse("Update Cart Quantity Success"),
 	}, nil
 }
 
