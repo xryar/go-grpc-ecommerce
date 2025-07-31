@@ -150,7 +150,40 @@ func (cs *cartService) DeleteCart(ctx context.Context, request *cart.DeleteCartR
 }
 
 func (cs *cartService) UpdateCartQuantity(ctx context.Context, request *cart.UpdateCartQuantityRequest) (*cart.UpdateCartQuantityResponse, error) {
+	claims, err := jwtentity.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 
+	cartEntity, err := cs.cartRepository.GetCartById(ctx, request.CartId)
+	if err != nil {
+		return nil, err
+	}
+	if cartEntity == nil {
+		return &cart.UpdateCartQuantityResponse{
+			Base: utils.NotFoundResponse("Cart Not Found"),
+		}, nil
+	}
+
+	if cartEntity.UserId != claims.Subject {
+		return &cart.UpdateCartQuantityResponse{
+			Base: utils.BadRequestResponse("Cart user is not matched"),
+		}, nil
+	}
+
+	now := time.Now()
+	cartEntity.Quantity = int(request.NewQuantity)
+	cartEntity.UpdateAt = &now
+	cartEntity.UpdatedBy = &claims.Fullname
+
+	err = cs.cartRepository.UpdateCart(ctx, cartEntity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cart.UpdateCartQuantityResponse{
+		Base: utils.SuccessResponse("Update Cart Success"),
+	}, nil
 }
 
 func NewCartService(productRespository repository.IProductRepository, cartRepository repository.ICartRepository) ICartService {
