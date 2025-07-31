@@ -18,6 +18,7 @@ type ICartService interface {
 	AddProductToCart(ctx context.Context, request *cart.AddProductToCartRequest) (*cart.AddProductToCartResponse, error)
 	ListCart(ctx context.Context, request *cart.ListCartRequest) (*cart.ListCartResponse, error)
 	DeleteCart(ctx context.Context, request *cart.DeleteCartRequest) (*cart.DeleteCartResponse, error)
+	UpdateCartQuantity(ctx context.Context, request *cart.UpdateCartQuantityRequest) (*cart.UpdateCartQuantityResponse, error)
 }
 
 type cartService struct {
@@ -146,6 +147,10 @@ func (cs *cartService) DeleteCart(ctx context.Context, request *cart.DeleteCartR
 	return &cart.DeleteCartResponse{
 		Base: utils.SuccessResponse("Delete Cart Success"),
 	}, nil
+}
+
+func (cs *cartService) UpdateCartQuantity(ctx context.Context, request *cart.UpdateCartQuantityRequest) (*cart.UpdateCartQuantityResponse, error) {
+
 }
 
 func NewCartService(productRespository repository.IProductRepository, cartRepository repository.ICartRepository) ICartService {
