@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -83,7 +85,33 @@ func (cs *cartService) AddProductToCart(ctx context.Context, request *cart.AddPr
 }
 
 func (cs *cartService) ListCart(ctx context.Context, request *cart.ListCartRequest) (*cart.ListCartResponse, error) {
+	claims, err := jwtentity.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 
+	carts, err := cs.cartRepository.GetListCart(ctx, claims.Subject)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*cart.ListCartResponseItem = make([]*cart.ListCartResponseItem, 0)
+	for _, cartEntity := range carts {
+		item := cart.ListCartResponseItem{
+			ProductId:       cartEntity.Product.Id,
+			ProductName:     cartEntity.Product.Name,
+			ProductImageUrl: fmt.Sprintf("%s/product/%s", os.Getenv("STORAGE_SERVICE_URL"), cartEntity.Product.ImageFileName),
+			ProductPrice:    cartEntity.Product.Price,
+			Quantity:        int64(cartEntity.Quantity),
+		}
+
+		items = append(items, &item)
+	}
+
+	return &cart.ListCartResponse{
+		Base:  utils.SuccessResponse("Get List Cart Success"),
+		Items: items,
+	}, nil
 }
 
 func NewCartService(productRespository repository.IProductRepository, cartRepository repository.ICartRepository) ICartService {
