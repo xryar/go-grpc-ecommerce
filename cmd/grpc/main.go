@@ -14,6 +14,7 @@ import (
 	"github.com/xryar/golang-grpc-ecommerce/internal/service"
 	"github.com/xryar/golang-grpc-ecommerce/pb/auth"
 	"github.com/xryar/golang-grpc-ecommerce/pb/cart"
+	"github.com/xryar/golang-grpc-ecommerce/pb/order"
 	"github.com/xryar/golang-grpc-ecommerce/pb/product"
 	"github.com/xryar/golang-grpc-ecommerce/pkg/database"
 	"google.golang.org/grpc"
@@ -49,6 +50,10 @@ func main() {
 	cartService := service.NewCartService(productRepository, cartRepository)
 	cartHandler := handler.NewCartHandler(cartService)
 
+	orderRepository := repository.NewOrderRepository(db)
+	orderService := service.NewOrderService(orderRepository, productRepository)
+	orderHandler := handler.NewOrderHandler(orderService)
+
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			grpcmiddleware.ErrorMiddleware,
@@ -59,6 +64,7 @@ func main() {
 	auth.RegisterAuthServiceServer(server, authHandler)
 	product.RegisterProductServiceServer(server, productHandler)
 	cart.RegisterCartServiceServer(server, cartHandler)
+	order.RegisterOrderServiceServer(server, orderHandler)
 
 	if os.Getenv("ENVIRONTMENT") == "dev" {
 		reflection.Register(server)

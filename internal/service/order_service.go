@@ -9,6 +9,7 @@ import (
 	"github.com/xryar/golang-grpc-ecommerce/internal/entity"
 	jwtentity "github.com/xryar/golang-grpc-ecommerce/internal/entity/jwt"
 	"github.com/xryar/golang-grpc-ecommerce/internal/repository"
+	"github.com/xryar/golang-grpc-ecommerce/internal/utils"
 	"github.com/xryar/golang-grpc-ecommerce/pb/order"
 )
 
@@ -98,6 +99,11 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 	if err != nil {
 		return nil, err
 	}
+
+	return &order.CreateOrderResponse{
+		Base: utils.SuccessResponse("Create Order Success"),
+		Id:   orderEntity.Id,
+	}, nil
 }
 
 func NewOrderService(orderRepository repository.IOrderRepository, productRepository repository.IProductRepository) IOrderService {

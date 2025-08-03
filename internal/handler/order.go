@@ -33,4 +33,8 @@ func (oh *orderHandler) CreateOrder(ctx context.Context, request *order.CreateOr
 	return res, nil
 }
 
-func NewOrderHandler() orderHandler
+func NewOrderHandler(orderService service.IOrderService) *orderHandler {
+	return &orderHandler{
+		orderService: orderService,
+	}
+}
