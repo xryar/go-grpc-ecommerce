@@ -11,6 +11,8 @@ import (
 type IOrderRepository interface {
 	GetNumbering(ctx context.Context, module string) (*entity.Numbering, error)
 	CreateOrder(ctx context.Context, order *entity.Order) error
+	UpdateNumbering(ctx context.Context, numbering *entity.Numbering) error
+	CreateOrderItem(ctx context.Context, orderItem *entity.OrderItem) error
 }
 
 type orderRepository struct {
@@ -70,6 +72,24 @@ func (or *orderRepository) CreateOrder(ctx context.Context, order *entity.Order)
 	}
 
 	return nil
+}
+
+func (or *orderRepository) UpdateNumbering(ctx context.Context, numbering *entity.Numbering) error {
+	_, err := or.db.ExecContext(
+		ctx,
+		"UPDATE numbering SET number = $1 WHERE module = $2",
+		numbering.Number,
+		numbering.Module,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (or *orderRepository) CreateOrderItem(ctx context.Context, orderItem *entity.OrderItem) error {
+
 }
 
 func NewOrderRepository(db *sql.DB) IOrderRepository {

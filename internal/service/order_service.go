@@ -74,8 +74,26 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		return nil, err
 	}
 
-	numbering++
+	for _, p := range request.Products {
+		var orderItem = entity.OrderItem{
+			Id:                   uuid.NewString(),
+			ProductId:            p.Id,
+			ProductName:          productMap[p.Id].Name,
+			ProductImageFileName: productMap[p.Id].ImageFileName,
+			ProductPrice:         productMap[p.Id].Price,
+			Quantity:             p.Quantity,
+			OrderId:              orderEntity.Id,
+			CreatedAt:            now,
+			CreatedBy:            claims.Fullname,
+		}
 
+		err = os.orderRepository.CreateOrderItem(ctx, &orderItem)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	numbering.Number++
 	err = os.orderRepository.UpdateNumbering(ctx, numbering)
 	if err != nil {
 		return nil, err
