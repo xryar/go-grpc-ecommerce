@@ -42,6 +42,16 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		return nil, err
 	}
 
+	productMap := make(map[string]*entity.Product)
+	for i := range products {
+		productMap[products[i].Id] = products[i]
+	}
+
+	var total float64 = 0
+	for _, p := range request.Products {
+		total += productMap[p.Id].Price * float64(p.Quantity)
+	}
+
 	now := time.Now()
 	expiredAt := now.Add(24 * time.Hour)
 	orderEntity := entity.Order{
@@ -53,7 +63,7 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		Address:         request.Address,
 		PhoneNumber:     request.PhoneNumber,
 		Notes:           &request.Notes,
-		Total:           0,
+		Total:           total,
 		ExpiredAt:       &expiredAt,
 		CreatedAt:       now,
 		CreatedBy:       claims.Fullname,
