@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/xryar/golang-grpc-ecommerce/internal/entity"
 	jwtentity "github.com/xryar/golang-grpc-ecommerce/internal/entity/jwt"
+	"github.com/xryar/golang-grpc-ecommerce/internal/repository"
 	"github.com/xryar/golang-grpc-ecommerce/pb/order"
 )
 
@@ -15,6 +17,8 @@ type IOrderService interface {
 }
 
 type orderService struct {
+	orderRepository   repository.IOrderRepository
+	productRepository repository.IProductRepository
 }
 
 func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
@@ -23,7 +27,17 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		return nil, err
 	}
 
-	numbering, err = os.orderRepository.GetNumbering(ctx, "order")
+	numbering, err := os.orderRepository.GetNumbering(ctx, "order")
+	if err != nil {
+		return nil, err
+	}
+
+	var productIds = make([]string, len(request.Products))
+	for i := range request.Products {
+		productIds[i] = request.Products[i].Id
+	}
+
+	products, err := os.productRepository.GetProductsByIds(ctx, productIds)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +46,7 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 	expiredAt := now.Add(24 * time.Hour)
 	orderEntity := entity.Order{
 		Id:              uuid.NewString(),
-		Number:          "",
+		Number:          fmt.Sprintf("ORD-%d%08d", now.Year(), numbering.Number),
 		UserId:          claims.Subject,
 		OrderStatusCode: entity.OrderStatusCodeUnpaid,
 		UserFullName:    request.FullName,
@@ -52,12 +66,15 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 
 	numbering++
 
-	err = os.orderRepository.UpdateNumbering(ctx numbering)
+	err = os.orderRepository.UpdateNumbering(ctx, numbering)
 	if err != nil {
 		return nil, err
 	}
 }
 
-func NewOrderService() IOrderService {
-	return &orderService{}
+func NewOrderService(orderRepository repository.IOrderRepository, productRepository repository.IProductRepository) IOrderService {
+	return &orderService{
+		orderRepository:   orderRepository,
+		productRepository: productRepository,
+	}
 }
