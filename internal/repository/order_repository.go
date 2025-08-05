@@ -30,7 +30,7 @@ func (or *orderRepository) WithTransaction(tx *sql.Tx) IOrderRepository {
 func (or *orderRepository) GetNumbering(ctx context.Context, module string) (*entity.Numbering, error) {
 	row := or.db.QueryRowContext(
 		ctx,
-		"SELECT module, number FROM numbering WHERE module = $1",
+		"SELECT module, number FROM numbering WHERE module = $1 FOR UPDATE",
 		module,
 	)
 	if row.Err() != nil {
@@ -122,7 +122,7 @@ func (or *orderRepository) CreateOrderItem(ctx context.Context, orderItem *entit
 	return nil
 }
 
-func NewOrderRepository(db *sql.DB) IOrderRepository {
+func NewOrderRepository(db database.DatabaseQuery) IOrderRepository {
 	return &orderRepository{
 		db: db,
 	}

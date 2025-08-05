@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"runtime/debug"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,8 +35,26 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if e := recover(); e != nil {
+			if tx != nil {
+				tx.Rollback()
+			}
 
-	numbering, err := os.orderRepository.GetNumbering(ctx, "order")
+			debug.PrintStack()
+			panic(e)
+		}
+	}()
+	defer func() {
+		if err != nil && tx != nil {
+			tx.Rollback()
+		}
+	}()
+
+	orderRepo := os.orderRepository.WithTransaction(tx)
+	productRepo := os.productRepository.WithTransaction(tx)
+
+	numbering, err := orderRepo.GetNumbering(ctx, "order")
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +64,7 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		productIds[i] = request.Products[i].Id
 	}
 
-	products, err := os.productRepository.GetProductsByIds(ctx, productIds)
+	products, err := productRepo.GetProductsByIds(ctx, productIds)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +101,7 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		CreatedBy:       claims.Fullname,
 	}
 
-	err = os.orderRepository.CreateOrder(ctx, &orderEntity)
+	err = orderRepo.CreateOrder(ctx, &orderEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -100,14 +119,19 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 			CreatedBy:            claims.Fullname,
 		}
 
-		err = os.orderRepository.CreateOrderItem(ctx, &orderItem)
+		err = orderRepo.CreateOrderItem(ctx, &orderItem)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	numbering.Number++
-	err = os.orderRepository.UpdateNumbering(ctx, numbering)
+	err = orderRepo.UpdateNumbering(ctx, numbering)
+	if err != nil {
+		return nil, err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
