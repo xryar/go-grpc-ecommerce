@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -18,12 +19,18 @@ type IOrderService interface {
 }
 
 type orderService struct {
+	db                *sql.DB
 	orderRepository   repository.IOrderRepository
 	productRepository repository.IProductRepository
 }
 
 func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
 	claims, err := jwtentity.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := os.db.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +118,9 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 	}, nil
 }
 
-func NewOrderService(orderRepository repository.IOrderRepository, productRepository repository.IProductRepository) IOrderService {
+func NewOrderService(db *sql.DB, orderRepository repository.IOrderRepository, productRepository repository.IProductRepository) IOrderService {
 	return &orderService{
+		db:                db,
 		orderRepository:   orderRepository,
 		productRepository: productRepository,
 	}
