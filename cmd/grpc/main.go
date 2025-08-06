@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/xendit/xendit-go"
 	"github.com/xryar/golang-grpc-ecommerce/internal/grpcmiddleware"
 	"github.com/xryar/golang-grpc-ecommerce/internal/handler"
 	"github.com/xryar/golang-grpc-ecommerce/internal/repository"
@@ -26,6 +27,7 @@ import (
 func main() {
 	ctx := context.Background()
 	godotenv.Load()
+	xendit.Opt.SecretKey = os.Getenv("XENDIT_SECRET_KEY")
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Panicf("Error when listening %v", err)
