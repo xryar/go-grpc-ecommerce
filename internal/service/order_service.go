@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	operatingSystem "os"
 	"runtime/debug"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/xendit/xendit-go"
+	"github.com/xendit/xendit-go/invoice"
 	"github.com/xryar/golang-grpc-ecommerce/internal/entity"
 	jwtentity "github.com/xryar/golang-grpc-ecommerce/internal/entity/jwt"
 	"github.com/xryar/golang-grpc-ecommerce/internal/repository"
@@ -100,6 +103,36 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 		CreatedAt:       now,
 		CreatedBy:       claims.Fullname,
 	}
+
+	invoiceItems := make([]xendit.InvoiceItem, 0)
+	for _, p := range request.Products {
+		prod := productMap[p.Id]
+		if prod != nil {
+			invoiceItems = append(invoiceItems, xendit.InvoiceItem{
+				Name:     prod.Name,
+				Price:    prod.Price,
+				Quantity: int(p.Quantity),
+			})
+		}
+	}
+
+	xenditInvoice, xenditErr := invoice.CreateWithContext(ctx, &invoice.CreateParams{
+		ExternalID: orderEntity.Id,
+		Amount:     total,
+		Customer: xendit.InvoiceCustomer{
+			GivenNames: claims.Fullname,
+		},
+		Currency:           "IDR",
+		SuccessRedirectURL: fmt.Sprintf("%s/checkout/%s/success", operatingSystem.Getenv("FRONTEND_BASE_URL"), orderEntity.Id),
+		Items:              invoiceItems,
+	})
+	if xenditErr != nil {
+		err = xenditErr
+		return nil, err
+	}
+
+	orderEntity.XenditInvoiceId = &xenditInvoice.ID
+	orderEntity.XenditInvoiceUrl = &xenditInvoice.InvoiceURL
 
 	err = orderRepo.CreateOrder(ctx, &orderEntity)
 	if err != nil {
