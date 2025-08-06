@@ -179,12 +179,6 @@ func (ps *productService) DeleteProduct(ctx context.Context, request *product.De
 		return nil, err
 	}
 
-	imagePath := filepath.Join("storage", "product", productEntity.ImageFileName)
-	err = os.Remove(imagePath)
-	if err != nil {
-		return nil, err
-	}
-
 	return &product.DeleteProductResponse{
 		Base: utils.SuccessResponse("Delete Product Success"),
 	}, nil
