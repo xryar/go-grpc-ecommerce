@@ -209,7 +209,7 @@ func (or *orderRepository) GetListOrderAdminPagination(ctx context.Context, pagi
 		}
 	}
 
-	baseQuery := fmt.Sprintf("SELECT id, number, order_status_code, total, user_full_name, created_at FROM \"order\" WHERE is_deleted = false %s LIMIT $1 OFFSET $2", sort)
+	baseQuery := fmt.Sprintf("SELECT id, number, order_status_code, total, user_full_name, created_at, expired_at FROM \"order\" WHERE is_deleted = false %s LIMIT $1 OFFSET $2", sort)
 	rows, err := or.db.QueryContext(
 		ctx,
 		baseQuery,
@@ -232,6 +232,7 @@ func (or *orderRepository) GetListOrderAdminPagination(ctx context.Context, pagi
 			&orderEntity.Total,
 			&orderEntity.UserFullName,
 			&orderEntity.CreatedAt,
+			&orderEntity.ExpiredAt,
 		)
 		if err != nil {
 			return nil, nil, err

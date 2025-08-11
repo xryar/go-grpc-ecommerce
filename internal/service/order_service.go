@@ -204,11 +204,16 @@ func (os *orderService) ListOrderAdmin(ctx context.Context, request *order.ListO
 			})
 		}
 
+		orderStatusCode := o.OrderStatusCode
+		if o.OrderStatusCode == entity.OrderStatusCodeUnpaid && time.Now().After(*o.ExpiredAt) {
+			orderStatusCode = entity.OrderStatusCodeExpired
+		}
+
 		items = append(items, &order.ListOrderAdminResponseItem{
 			Id:         o.Id,
 			Number:     o.Number,
 			Customer:   o.UserFullName,
-			StatusCode: o.OrderStatusCode,
+			StatusCode: orderStatusCode,
 			Total:      o.Total,
 			CreatedAt:  timestamppb.New(o.CreatedAt),
 			Products:   products,
