@@ -16,10 +16,12 @@ import (
 	"github.com/xryar/golang-grpc-ecommerce/internal/repository"
 	"github.com/xryar/golang-grpc-ecommerce/internal/utils"
 	"github.com/xryar/golang-grpc-ecommerce/pb/order"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type IOrderService interface {
 	CreateOrder(ctx context.Context, request *order.CreateOrderRequest) (*order.CreateOrderResponse, error)
+	ListOrderAdmin(ctx context.Context, request *order.ListOrderAdminRequest) (*order.ListOrderAdminResponse, error)
 }
 
 type orderService struct {
@@ -172,6 +174,51 @@ func (os *orderService) CreateOrder(ctx context.Context, request *order.CreateOr
 	return &order.CreateOrderResponse{
 		Base: utils.SuccessResponse("Create Order Success"),
 		Id:   orderEntity.Id,
+	}, nil
+}
+
+func (os *orderService) ListOrderAdmin(ctx context.Context, request *order.ListOrderAdminRequest) (*order.ListOrderAdminResponse, error) {
+	claims, err := jwtentity.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if claims.Role != entity.UserRoleAdmin {
+		return nil, utils.UnauthenticatedResponse()
+	}
+
+	orders, metadata, err := os.orderRepository.GetListOrderAdminPagination(ctx, request.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*order.ListOrderAdminResponseItem, 0)
+	for _, o := range orders {
+		products := make([]*order.ListOrderAdminResponseItemProducts, 0)
+		for _, io := range o.Items {
+			products = append(products, &order.ListOrderAdminResponseItemProducts{
+				Id:       io.ProductId,
+				Name:     io.ProductName,
+				Price:    io.ProductPrice,
+				Quantity: io.Quantity,
+			})
+		}
+
+		items = append(items, &order.ListOrderAdminResponseItem{
+			Id:         o.Id,
+			Number:     o.Number,
+			Customer:   o.UserFullName,
+			StatusCode: o.OrderStatusCode,
+			Total:      o.Total,
+			CreatedAt:  timestamppb.New(o.CreatedAt),
+			Products:   products,
+		})
+	}
+
+	return &order.ListOrderAdminResponse{
+		Base:       utils.SuccessResponse("Get List Order Admin Success"),
+		Pagination: metadata,
+		Items:      items,
 	}, nil
 }
 
