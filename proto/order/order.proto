@@ -114,5 +114,7 @@ message DetailOrderResponse {
     string order_status_code = 8;
     google.protobuf.Timestamp created_at = 9;
     string xendit_invoice_url = 10;
-    repeated DetailOrderResponse items = 11;
+    repeated DetailOrderResponseItem items = 11;
+    double total = 12;
+    google.protobuf.Timestamp expired_at = 13;
 }

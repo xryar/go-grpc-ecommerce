@@ -855,18 +855,20 @@ func (x *DetailOrderResponseItem) GetQuantity() int64 {
 }
 
 type DetailOrderResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Base             *common.BaseResponse   `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
-	Id               string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	Number           string                 `protobuf:"bytes,3,opt,name=number,proto3" json:"number,omitempty"`
-	UserFullName     string                 `protobuf:"bytes,4,opt,name=user_full_name,json=userFullName,proto3" json:"user_full_name,omitempty"`
-	Address          string                 `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
-	PhoneNumber      string                 `protobuf:"bytes,6,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
-	Notes            string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
-	OrderStatusCode  string                 `protobuf:"bytes,8,opt,name=order_status_code,json=orderStatusCode,proto3" json:"order_status_code,omitempty"`
-	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	XenditInvoiceUrl string                 `protobuf:"bytes,10,opt,name=xendit_invoice_url,json=xenditInvoiceUrl,proto3" json:"xendit_invoice_url,omitempty"`
-	Items            []*DetailOrderResponse `protobuf:"bytes,11,rep,name=items,proto3" json:"items,omitempty"`
+	state            protoimpl.MessageState     `protogen:"open.v1"`
+	Base             *common.BaseResponse       `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
+	Id               string                     `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Number           string                     `protobuf:"bytes,3,opt,name=number,proto3" json:"number,omitempty"`
+	UserFullName     string                     `protobuf:"bytes,4,opt,name=user_full_name,json=userFullName,proto3" json:"user_full_name,omitempty"`
+	Address          string                     `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
+	PhoneNumber      string                     `protobuf:"bytes,6,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	Notes            string                     `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
+	OrderStatusCode  string                     `protobuf:"bytes,8,opt,name=order_status_code,json=orderStatusCode,proto3" json:"order_status_code,omitempty"`
+	CreatedAt        *timestamppb.Timestamp     `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	XenditInvoiceUrl string                     `protobuf:"bytes,10,opt,name=xendit_invoice_url,json=xenditInvoiceUrl,proto3" json:"xendit_invoice_url,omitempty"`
+	Items            []*DetailOrderResponseItem `protobuf:"bytes,11,rep,name=items,proto3" json:"items,omitempty"`
+	Total            float64                    `protobuf:"fixed64,12,opt,name=total,proto3" json:"total,omitempty"`
+	ExpiredAt        *timestamppb.Timestamp     `protobuf:"bytes,13,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -971,9 +973,23 @@ func (x *DetailOrderResponse) GetXenditInvoiceUrl() string {
 	return ""
 }
 
-func (x *DetailOrderResponse) GetItems() []*DetailOrderResponse {
+func (x *DetailOrderResponse) GetItems() []*DetailOrderResponseItem {
 	if x != nil {
 		return x.Items
+	}
+	return nil
+}
+
+func (x *DetailOrderResponse) GetTotal() float64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *DetailOrderResponse) GetExpiredAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiredAt
 	}
 	return nil
 }
@@ -1056,7 +1072,7 @@ const file_order_order_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05price\x18\x03 \x01(\x01R\x05price\x12\x1a\n" +
-	"\bquantity\x18\x04 \x01(\x03R\bquantity\"\xa7\x03\n" +
+	"\bquantity\x18\x04 \x01(\x03R\bquantity\"\xfc\x03\n" +
 	"\x13DetailOrderResponse\x12(\n" +
 	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\x12\x16\n" +
@@ -1069,8 +1085,11 @@ const file_order_order_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12,\n" +
 	"\x12xendit_invoice_url\x18\n" +
-	" \x01(\tR\x10xenditInvoiceUrl\x120\n" +
-	"\x05items\x18\v \x03(\v2\x1a.order.DetailOrderResponseR\x05items2\xa9\x02\n" +
+	" \x01(\tR\x10xenditInvoiceUrl\x124\n" +
+	"\x05items\x18\v \x03(\v2\x1e.order.DetailOrderResponseItemR\x05items\x12\x14\n" +
+	"\x05total\x18\f \x01(\x01R\x05total\x129\n" +
+	"\n" +
+	"expired_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt2\xa9\x02\n" +
 	"\fOrderService\x12D\n" +
 	"\vCreateOrder\x12\x19.order.CreateOrderRequest\x1a\x1a.order.CreateOrderResponse\x12M\n" +
 	"\x0eListOrderAdmin\x12\x1c.order.ListOrderAdminRequest\x1a\x1d.order.ListOrderAdminResponse\x12>\n" +
@@ -1127,20 +1146,21 @@ var file_order_order_proto_depIdxs = []int32{
 	9,  // 13: order.ListOrderResponse.items:type_name -> order.ListOrderResponseItem
 	14, // 14: order.DetailOrderResponse.base:type_name -> common.BaseResponse
 	16, // 15: order.DetailOrderResponse.created_at:type_name -> google.protobuf.Timestamp
-	13, // 16: order.DetailOrderResponse.items:type_name -> order.DetailOrderResponse
-	1,  // 17: order.OrderService.CreateOrder:input_type -> order.CreateOrderRequest
-	3,  // 18: order.OrderService.ListOrderAdmin:input_type -> order.ListOrderAdminRequest
-	7,  // 19: order.OrderService.ListOrder:input_type -> order.ListOrderRequest
-	11, // 20: order.OrderService.DetailOrder:input_type -> order.DetailOrderRequest
-	2,  // 21: order.OrderService.CreateOrder:output_type -> order.CreateOrderResponse
-	6,  // 22: order.OrderService.ListOrderAdmin:output_type -> order.ListOrderAdminResponse
-	10, // 23: order.OrderService.ListOrder:output_type -> order.ListOrderResponse
-	13, // 24: order.OrderService.DetailOrder:output_type -> order.DetailOrderResponse
-	21, // [21:25] is the sub-list for method output_type
-	17, // [17:21] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	12, // 16: order.DetailOrderResponse.items:type_name -> order.DetailOrderResponseItem
+	16, // 17: order.DetailOrderResponse.expired_at:type_name -> google.protobuf.Timestamp
+	1,  // 18: order.OrderService.CreateOrder:input_type -> order.CreateOrderRequest
+	3,  // 19: order.OrderService.ListOrderAdmin:input_type -> order.ListOrderAdminRequest
+	7,  // 20: order.OrderService.ListOrder:input_type -> order.ListOrderRequest
+	11, // 21: order.OrderService.DetailOrder:input_type -> order.DetailOrderRequest
+	2,  // 22: order.OrderService.CreateOrder:output_type -> order.CreateOrderResponse
+	6,  // 23: order.OrderService.ListOrderAdmin:output_type -> order.ListOrderAdminResponse
+	10, // 24: order.OrderService.ListOrder:output_type -> order.ListOrderResponse
+	13, // 25: order.OrderService.DetailOrder:output_type -> order.DetailOrderResponse
+	22, // [22:26] is the sub-list for method output_type
+	18, // [18:22] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_order_order_proto_init() }
