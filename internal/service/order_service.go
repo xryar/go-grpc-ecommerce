@@ -22,6 +22,7 @@ import (
 type IOrderService interface {
 	CreateOrder(ctx context.Context, request *order.CreateOrderRequest) (*order.CreateOrderResponse, error)
 	ListOrderAdmin(ctx context.Context, request *order.ListOrderAdminRequest) (*order.ListOrderAdminResponse, error)
+	ListOrder(ctx context.Context, request *order.ListOrderRequest) (*order.ListOrderResponse, error)
 }
 
 type orderService struct {
@@ -222,6 +223,57 @@ func (os *orderService) ListOrderAdmin(ctx context.Context, request *order.ListO
 
 	return &order.ListOrderAdminResponse{
 		Base:       utils.SuccessResponse("Get List Order Admin Success"),
+		Pagination: metadata,
+		Items:      items,
+	}, nil
+}
+
+func (os *orderService) ListOrder(ctx context.Context, request *order.ListOrderRequest) (*order.ListOrderResponse, error) {
+	claims, err := jwtentity.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	orders, metadata, err := os.orderRepository.GetListOrderPagination(ctx, request.Pagination, claims.Subject)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*order.ListOrderResponseItem, 0)
+	for _, o := range orders {
+		products := make([]*order.ListOrderResponseItemProducts, 0)
+		for _, io := range o.Items {
+			products = append(products, &order.ListOrderResponseItemProducts{
+				Id:       io.ProductId,
+				Name:     io.ProductName,
+				Price:    io.ProductPrice,
+				Quantity: io.Quantity,
+			})
+		}
+
+		orderStatusCode := o.OrderStatusCode
+		if o.OrderStatusCode == entity.OrderStatusCodeUnpaid && time.Now().After(*o.ExpiredAt) {
+			orderStatusCode = entity.OrderStatusCodeExpired
+		}
+
+		xenditInvoiceUrl := ""
+		if o.XenditInvoiceUrl != nil {
+			xenditInvoiceUrl = *o.XenditInvoiceUrl
+		}
+		items = append(items, &order.ListOrderResponseItem{
+			Id:               o.Id,
+			Number:           o.Number,
+			Customer:         o.UserFullName,
+			StatusCode:       orderStatusCode,
+			Total:            o.Total,
+			CreatedAt:        timestamppb.New(o.CreatedAt),
+			Products:         products,
+			XenditInvoiceUrl: xenditInvoiceUrl,
+		})
+	}
+
+	return &order.ListOrderResponse{
+		Base:       utils.SuccessResponse("Get List Order Success"),
 		Pagination: metadata,
 		Items:      items,
 	}, nil
