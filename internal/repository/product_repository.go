@@ -278,7 +278,27 @@ func (repo *productRepository) GetProductsPaginationAdmin(ctx context.Context, p
 func (repo *productRepository) GetProductHighlight(ctx context.Context) ([]*entity.Product, error) {
 	rows, err := repo.db.QueryContext(
 		ctx,
-		"SELECT id, name, description, price, image_file_name FROM product WHERE is_deleted = false ORDER BY created_at DESC LIMIT 3",
+		`
+		SELECT 
+			id,
+			name, 
+			description, 
+			price, 
+			image_file_name
+		FROM 
+			product
+		WHERE 
+			id IN (
+				SELECT p.id
+				FROM product p
+				JOIN order_item oi ON oi.product_id = p.id
+				WHERE
+					p.is_deleted = false AND oi.is_deleted = false
+				GROUP BY p.id 
+				ORDER BY COUNT(*) DESC
+				LIMIT 3
+			);
+		`,
 	)
 	if err != nil {
 		return nil, err
