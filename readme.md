@@ -1,6 +1,6 @@
-# 🛒 Ecommerce Backend with Golang, gRPC, Supabase & Xendit
+# 🛒 E-commerce Backend Service with Golang, gRPC, Supabase & Xendit
 
-This project is a backend system for an **Ecommerce** platform built using **Golang** with gRPC architecture. 
+This project is a backend system for an **E-commerce** platform built using **Golang** with gRPC architecture. 
 This application is integrated with **Supabase** as a database, and **Xendit** Payment Gateway for payment processing.
 
 ## 🚀 Key Features
